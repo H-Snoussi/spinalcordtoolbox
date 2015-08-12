@@ -39,16 +39,16 @@ class VladStraighten(object):
         cmd = "sct_propseg -i "+self.input_image+" -t t2 -o ."
         sct.run(cmd)
 
-        cmd = "sct_orientation -i "+self.input_image+" -s IPL -o "+in_orient
+        cmd = "sct_orientation -i "+self.input_image+" -s RPI -o "+in_orient
         sct.run(cmd)
 
-        cmd = "sct_orientation -i "+fname_seg+" -s IPL -o "+fname_seg_orient
+        cmd = "sct_orientation -i "+fname_seg+" -s RPI -o "+fname_seg_orient
         sct.run(cmd)
 
         if os.path.isfile(niigz_out):
             os.remove(niigz_out)
         sct.printv(os.getcwd())
-        cmd = "itk_spine_straighten "+in_orient+" "+fname_seg_orient+" "+niigz_out+" --seg --ref "+in_orient
+        cmd = "itk_spine_straighten "+in_orient+" "+fname_seg_orient+" "+niigz_out+" --seg"
         sct.printv(cmd)
         output = commands.getoutput(cmd)
 

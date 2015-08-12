@@ -202,11 +202,11 @@ class SpinalCordStraightener(object):
                 # set coordinates for landmark at the center of the cross
                 coord = Coordinate([0, 0, 0, 0])
                 coord.x, coord.y, coord.z = x_centerline_fit[iz], y_centerline_fit[iz], z_centerline[iz]
-                # temp_results.append(coord)
+                temp_results.append(coord)
 
                 # set y coordinate to y_centerline_fit[iz] for elements 1 and 2 of the cross
-                cross_coordinates = [Coordinate(), Coordinate(), Coordinate(), Coordinate()]
-
+                # cross_coordinates = [Coordinate(), Coordinate(), Coordinate(), Coordinate()]
+                cross_coordinates = [Coordinate(), Coordinate()]
                 cross_coordinates[0].y = y_centerline_fit[iz]
                 cross_coordinates[1].y = y_centerline_fit[iz]
 
@@ -218,18 +218,18 @@ class SpinalCordStraightener(object):
                 cross_coordinates[1].z = (-1 / c) * (a * cross_coordinates[1].x + b * y + d)  # z for -x
 
                 # set x coordinate to x_centerline_fit[iz] for elements 3 and 4 of the cross
-                cross_coordinates[2].x = x_centerline_fit[iz]
-                cross_coordinates[3].x = x_centerline_fit[iz]
+                #cross_coordinates[2].x = x_centerline_fit[iz]
+                #cross_coordinates[3].x = x_centerline_fit[iz]
 
                 # set coordinates for landmarks +y and -y. Here, x coordinate is 0 (already initialized).
                 y_n = Symbol('y_n')
-                cross_coordinates[3].y, cross_coordinates[2].y = solve(
-                    (y_n - y) ** 2 + ((-1 / c) * (a * x + b * y_n + d) - z) ** 2 - self.gapxy ** 2, y_n)  # y for -y and +y
-                cross_coordinates[2].z = (-1 / c) * (a * x + b * cross_coordinates[2].y + d)  # z for +y
-                cross_coordinates[3].z = (-1 / c) * (a * x + b * cross_coordinates[3].y + d)  # z for -y
+                #cross_coordinates[3].y, cross_coordinates[2].y = solve(
+                    # (y_n - y) ** 2 + ((-1 / c) * (a * x + b * y_n + d) - z) ** 2 - self.gapxy ** 2, y_n)  # y for -y and +y
+                #cross_coordinates[2].z = (-1 / c) * (a * x + b * cross_coordinates[2].y + d)  # z for +y
+                #cross_coordinates[3].z = (-1 / c) * (a * x + b * cross_coordinates[3].y + d)  # z for -y
 
-                for coord in cross_coordinates:
-                   temp_results.append(coord)
+               # for coord in cross_coordinates:
+                 #  temp_results.append(coord)
             else:
                 if self.all_labels >= 1:
                     temp_results.append(
@@ -420,16 +420,16 @@ class SpinalCordStraightener(object):
                 if iz in iz_curved:
                     index = iz_curved.index(iz)
                     # set coordinates for landmark at the center of the cross
-                    # landmark_straight.append(Coordinate([x0, y0, iz_straight[index], landmark_curved_value]))
+                    landmark_straight.append(Coordinate([x0, y0, iz_straight[index], landmark_curved_value]))
                     # set x, y and z coordinates for landmarks +x
                     landmark_straight.append(Coordinate([x0 + gapxy, y0, iz_straight[index], landmark_curved_value+1]))
                     # set x, y and z coordinates for landmarks -x
                     landmark_straight.append(Coordinate([x0 - gapxy, y0, iz_straight[index], landmark_curved_value+2]))
                     # set x, y and z coordinates for landmarks +y
-                    landmark_straight.append(Coordinate([x0, y0 + gapxy, iz_straight[index], landmark_curved_value+3]))
+                    # landmark_straight.append(Coordinate([x0, y0 + gapxy, iz_straight[index], landmark_curved_value+3]))
                     # set x, y and z coordinates for landmarks -y
-                    landmark_straight.append(Coordinate([x0, y0 - gapxy, iz_straight[index], landmark_curved_value+4]))
-                    landmark_curved_value += 4
+                    # landmark_straight.append(Coordinate([x0, y0 - gapxy, iz_straight[index], landmark_curved_value+4]))
+                    landmark_curved_value += 3
                 else:
                     if self.all_labels >= 1:
                         landmark_straight.append(Coordinate([x0, y0, iz, landmark_curved_value]))
