@@ -9,7 +9,7 @@ coeffvals=cell(dims(1));
 
 for Z=1:dims(3)
     img_max=max(max(max(max(img(:,:,Z,:)))));
-    parfor X=1:dims(1)
+    for X=1:dims(1)
         for Y=1:dims(2)
             
             % Set up fittype and options.
@@ -19,9 +19,9 @@ for Z=1:dims(3)
             opts.Display = 'Off';
             opts.Robust = 'Bisquare';
             
-% opts.Lower = [-Inf -0.1 -Inf -0.1];
-% opts.StartPoint = [5004 -0.01 500 -0.0081];
-% opts.Upper = [Inf Inf Inf Inf];
+            % opts.Lower = [-Inf -0.1 -Inf -0.1];
+            % opts.StartPoint = [5004 -0.01 500 -0.0081];
+            % opts.Upper = [Inf Inf Inf Inf];
             
             [xData, yData] = prepareCurveData( TE', squeeze(img(X,Y,Z,:)) );
             
@@ -29,7 +29,7 @@ for Z=1:dims(3)
             [fitresult, gof] = fit( xData, yData, ft, opts );
             coeff_tmp = coeffvalues(fitresult);
             coeff_tmp(2) = -1/coeff_tmp(2);
-%             coeff_tmp(4) = -1/coeff_tmp(4);
+            % coeff_tmp(4) = -1/coeff_tmp(4);
             if verbose
                 disp('      I       Ti  ')
                 disp(coeff_tmp)

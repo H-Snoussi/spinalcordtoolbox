@@ -29,5 +29,8 @@ for ifile =1:length(tractlist)
     tract=load_nii([path tractlist{ifile}]);
     tract_roi=tract.img(:,:,z_lev);
     tract_roi=make_nii(double(tract_roi),[template.hdr.dime.pixdim(2:3) slicethickness],[],[]);
-    save_nii_v2(tract_roi,['./template_roi/atlas/' sct_tool_remove_extension(tractlist{ifile},0) '_roi'])
+    [tractname,~,ext]=sct_tool_remove_extension(tractlist{ifile},0);
+    save_nii_v2(tract_roi,['./template_roi/atlas/' tractname ext])
 end
+
+copyfile([sct_dir '/data/atlas/info_label.txt'],'template_roi/atlas/')

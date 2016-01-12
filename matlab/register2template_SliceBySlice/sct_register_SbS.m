@@ -18,10 +18,11 @@ sct_unix('sct_concat_transfo -w step0/step00GenericAffine.mat,step0/step01Warp.n
 sct_unix('sct_concat_transfo -w warp_dest2src_reslice.nii.gz,step0/step01InverseWarp.nii.gz,-step0/step00GenericAffine.mat -d src.nii -o warp_inverse.nii');
 
 % bring back results
-sct_unix(['mv src_reslice_reg.nii ' basename '_reg.nii']);
-sct_unix(['mv warp_forward.nii ' path]);
-sct_unix(['mv warp_inverse.nii ' path]);
-
 cd ../
+sct_unix(['mv ' tmp_folder filesep 'src_reslice_reg.nii ' basename '_reg.nii']);
+sct_unix(['mv ' tmp_folder filesep 'warp_forward.nii ' path]);
+sct_unix(['mv ' tmp_folder filesep 'warp_inverse.nii ' path]);
+
+
 rmdir(tmp_folder,'s')
 disp(['>> unix('' fslview ' basename '_reg.nii ' dest ''')'])
