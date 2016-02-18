@@ -61,9 +61,9 @@ def get_parser():
                       description='Input data',
                       mandatory=True,
                       example='data_highQ.nii')
-    parser.add_option(name='-f',
+    parser.add_option(name='-dof',
                       type_value='int',
-                      description='Degree of freedom of the noise distribution. Corresponds to the number of antenna in a non-parallel acquisition with sum of squares combination. Otherwise, f is close to 1.',
+                      description='Degree of freedom of the noise distribution. Corresponds to the number of antenna for an acquisition without parallel imaging with sum of squares combination. Otherwise, dof is close to 1.',
                       mandatory=False,
                       default_value=str(param.freedom_degree),
                       example='1')
@@ -85,7 +85,7 @@ if __name__ == '__main__':
     arguments = parser.parse(sys.argv[1:])
 
     fname_in = arguments['-i']
-    freedom_degree = int(arguments['-f'])
+    freedom_degree = int(arguments['-dof'])
 
     if "-ofolder" in arguments:
         folder_output = arguments["-ofolder"]
