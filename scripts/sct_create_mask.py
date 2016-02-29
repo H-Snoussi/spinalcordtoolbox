@@ -5,7 +5,7 @@
 #
 # ---------------------------------------------------------------------------------------
 # Copyright (c) 2014 Polytechnique Montreal <www.neuro.polymtl.ca>
-# Authors: Julien Cohen-Adad
+# Authors: Julien Cohen-Adad, Charley Gros (>> -p background,0.1)
 # Modified: 2014-10-11
 #
 # About the license: see the file LICENSE.TXT
@@ -36,7 +36,7 @@ class Param:
         self.debug = 0
         self.fname_data = ''
         self.fname_out = ''
-        self.process_list = ['coord', 'point', 'centerline', 'center']
+        self.process_list = ['coord', 'point', 'centerline', 'center','background']
         self.process = 'center'  # default method
         self.shape_list = ['cylinder', 'box', 'gaussian']
         self.shape = 'cylinder'  # default shape
@@ -166,40 +166,50 @@ def create_mask():
     if method_type == 'centerline':
         # get name of centerline from user argument
         fname_centerline = 'centerline.nii.gz'
+    elif method_type == 'background':
+        mask=numpy.zeros((nx,ny,nz))
+        img_data = nibabel.load('data.nii')
+        data = img_data.get_data()
+        for iz in range(nz):
+            mask[:,:,iz] = data[:,:,iz] < float(method_val) * numpy.max(data[:,:,iz])
+        file_mask = 'mask'
+        im_mask = nibabel.Nifti1Image(mask,None)
+        nibabel.save(im_mask, (file_mask+'.nii.gz'))
     else:
         # generate volume with line along Z at coordinates 'coord'
         sct.printv('\nCreate line...', param.verbose)
         fname_centerline = create_line('data.nii', coord, nz)
 
-    # create mask
-    sct.printv('\nCreate mask...', param.verbose)
-    centerline = nibabel.load(fname_centerline)  # open centerline
-    hdr = centerline.get_header()  # get header
-    hdr.set_data_dtype('uint8')  # set imagetype to uint8
-    data_centerline = centerline.get_data()  # get centerline
-    z_centerline = [iz for iz in range(0, nz, 1) if data_centerline[:, :, iz].any()]
-    nz = len(z_centerline)
-    # get center of mass of the centerline
-    cx = [0] * nz
-    cy = [0] * nz
-    for iz in range(0, nz, 1):
-        cx[iz], cy[iz] = ndimage.measurements.center_of_mass(numpy.array(data_centerline[:, :, z_centerline[iz]]))
-    # create 2d masks
-    file_mask = 'data_mask'
-    for iz in range(nz):
-        center = numpy.array([cx[iz], cy[iz]])
-        mask2d = create_mask2d(center, param.shape, param.size, nx, ny, param.even)
-        # Write NIFTI volumes
-        img = nibabel.Nifti1Image(mask2d, None, hdr)
-        nibabel.save(img, (file_mask+str(iz)+'.nii'))
-    # merge along Z
-    # cmd = 'fslmerge -z mask '
-    im_list = []
-    for iz in range(nz):
-        im_list.append(Image(file_mask+str(iz)+'.nii'))
-    im_out = concat_data(im_list, 2)
-    im_out.setFileName('mask.nii.gz')
-    im_out.save()
+    if not method_type == 'background':
+        # create mask
+        sct.printv('\nCreate mask...', param.verbose)
+        centerline = nibabel.load(fname_centerline)  # open centerline
+        hdr = centerline.get_header()  # get header
+        hdr.set_data_dtype('uint8')  # set imagetype to uint8
+        data_centerline = centerline.get_data()  # get centerline
+        z_centerline = [iz for iz in range(0, nz, 1) if data_centerline[:, :, iz].any()]
+        nz = len(z_centerline)
+        # get center of mass of the centerline
+        cx = [0] * nz
+        cy = [0] * nz
+        for iz in range(0, nz, 1):
+            cx[iz], cy[iz] = ndimage.measurements.center_of_mass(numpy.array(data_centerline[:, :, z_centerline[iz]]))
+        # create 2d masks
+        file_mask = 'data_mask'
+        for iz in range(nz):
+            center = numpy.array([cx[iz], cy[iz]])
+            mask2d = create_mask2d(center, param.shape, param.size, nx, ny, param.even)
+            # Write NIFTI volumes
+            img = nibabel.Nifti1Image(mask2d, None, hdr)
+            nibabel.save(img, (file_mask+str(iz)+'.nii'))
+        # merge along Z
+        # cmd = 'fslmerge -z mask '
+        im_list = []
+        for iz in range(nz):
+            im_list.append(Image(file_mask+str(iz)+'.nii'))
+        im_out = concat_data(im_list, 2)
+        im_out.setFileName('mask.nii.gz')
+        im_out.save()
 
     # copy geometry
     im_dat = Image('data.nii')
@@ -299,7 +309,8 @@ def get_parser():
                                   '   coord: X,Y coordinate of center of mask. E.g.: coord,20x15\n'
                                   '   point: volume that contains a single point. E.g.: point,label.nii.gz\n'
                                   '   center: mask is created at center of FOV. In that case, "val" is not required.\n'
-                                  '   centerline: volume that contains centerline. E.g.: centerline,my_centerline.nii',
+                                  '   centerline: volume that contains centerline. E.g.: centerline,my_centerline.nii\n'
+                                  '   background: background mask is created depending on the input threshold value. E.g.: background,0.1',
                       mandatory=True,
                       default_value=param_default.process,
                       example=['centerline,data_centerline.nii.gz'])
