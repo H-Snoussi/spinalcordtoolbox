@@ -5,7 +5,7 @@
 #
 # ---------------------------------------------------------------------------------------
 # Copyright (c) 2014 Polytechnique Montreal <www.neuro.polymtl.ca>
-# Authors: Julien Cohen-Adad, Charley Gros (>> -p background,0.1)
+# Authors: Julien Cohen-Adad, Charley Gros (>> -p foreground,0.1)
 # Modified: 2014-10-11
 #
 # About the license: see the file LICENSE.TXT
@@ -36,7 +36,7 @@ class Param:
         self.debug = 0
         self.fname_data = ''
         self.fname_out = ''
-        self.process_list = ['coord', 'point', 'centerline', 'center','background']
+        self.process_list = ['coord', 'point', 'centerline', 'center','foreground']
         self.process = 'center'  # default method
         self.shape_list = ['cylinder', 'box', 'gaussian']
         self.shape = 'cylinder'  # default shape
@@ -166,12 +166,22 @@ def create_mask():
     if method_type == 'centerline':
         # get name of centerline from user argument
         fname_centerline = 'centerline.nii.gz'
-    elif method_type == 'background':
+    elif method_type == 'foreground':
         mask=numpy.zeros((nx,ny,nz))
         img_data = nibabel.load('data.nii')
         data = img_data.get_data()
+        # Circular structure generation for morphological opening
+        radius = 6
+        size_circular_structure = radius*2+1
+        m,n = numpy.mgrid[0:size_circular_structure, 0:size_circular_structure]
+        m -= (size_circular_structure/2)
+        n -= (size_circular_structure/2)
+        circular_structure = numpy.sqrt(m**2+n**2) <= radius
         for iz in range(nz):
-            mask[:,:,iz] = data[:,:,iz] < float(method_val) * numpy.max(data[:,:,iz])
+            mask[:,:,iz] = data[:,:,iz] > float(method_val) * numpy.max(data[:,:,iz])
+            mask[:,:,iz]=ndimage.binary_opening(mask[:,:,iz],circular_structure) # Structure = disk
+            #mask[:,:,iz]=ndimage.binary_opening(mask[:,:,iz],structure=numpy.ones((8,8))) # Structure = square
+            mask[:,:,iz]=ndimage.binary_fill_holes(mask[:,:,iz])
         file_mask = 'mask'
         im_mask = nibabel.Nifti1Image(mask,None)
         nibabel.save(im_mask, (file_mask+'.nii.gz'))
@@ -180,7 +190,7 @@ def create_mask():
         sct.printv('\nCreate line...', param.verbose)
         fname_centerline = create_line('data.nii', coord, nz)
 
-    if not method_type == 'background':
+    if not method_type == 'foreground':
         # create mask
         sct.printv('\nCreate mask...', param.verbose)
         centerline = nibabel.load(fname_centerline)  # open centerline
@@ -307,10 +317,16 @@ def get_parser():
                       type_value=[[','], 'str'],
                       description='Process to generate mask and associated value.\n'
                                   '   coord: X,Y coordinate of center of mask. E.g.: coord,20x15\n'
-                                  '   point: volume that contains a single point. E.g.: point,label.nii.gz\n'
-                                  '   center: mask is created at center of FOV. In that case, "val" is not required.\n'
-                                  '   centerline: volume that contains centerline. E.g.: centerline,my_centerline.nii\n'
-                                  '   background: background mask is created depending on the input threshold value. E.g.: background,0.1',
+                                  '   point: volume that contains a single point. E.g.:\n'
+                                  '         point,label.nii.gz\n'
+                                  '   center: mask is created at center of FOV. In that case, "val" is\n'
+                                  '         not required.\n'
+                                  '   centerline: volume that contains centerline. E.g.:\n'
+                                  '         centerline,my_centerline.nii\n'
+                                  '   foreground: creates a binary mask based on values over a\n'
+                                  '         threshold. Threshold is defined slice by slice as a\n'
+                                  '         percentage of the maximal value of the slice. E.g.:\n'
+                                  '         foreground,0.1',
                       mandatory=True,
                       default_value=param_default.process,
                       example=['centerline,data_centerline.nii.gz'])
