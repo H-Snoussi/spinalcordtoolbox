@@ -79,6 +79,14 @@ def test(data_path):
     status += s
     output += o
 
+    # method foreground
+    cmd = 'sct_create_mask -i ' + data_path + folder_data[1] + file_data[3] \
+          + ' -p foreground,0.1'
+    output += cmd+'\n'  # copy command
+    s, o = commands.getstatusoutput(cmd)
+    status += s
+    output += o
+
     return status, output
 
 

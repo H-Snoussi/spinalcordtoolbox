@@ -5,7 +5,7 @@
 #
 # ---------------------------------------------------------------------------------------
 # Copyright (c) 2014 Polytechnique Montreal <www.neuro.polymtl.ca>
-# Authors: Julien Cohen-Adad, Charley Gros (>> -p foreground,0.1)
+# Authors: Julien Cohen-Adad
 # Modified: 2014-10-11
 #
 # About the license: see the file LICENSE.TXT
