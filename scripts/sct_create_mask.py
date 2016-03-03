@@ -171,7 +171,7 @@ def create_mask():
         img_data = nibabel.load('data.nii')
         data = img_data.get_data()
         # Circular structure generation for morphological opening
-        radius = 6
+        radius = 4
         size_circular_structure = radius*2+1
         m,n = numpy.mgrid[0:size_circular_structure, 0:size_circular_structure]
         m -= (size_circular_structure/2)
