@@ -7,13 +7,6 @@
 # About the license: see the file LICENSE.TXT
 #########################################################################################
 
-# TODO : - check results
-#         - dilate mask
-#         - documentation
-#         - N4ITK >> tout le monde l'a ?
-#         - Rendre tous les param dispo ?
-#
-
 import os
 import sys
 from nipype.interfaces.ants import N4BiasFieldCorrection
@@ -28,8 +21,8 @@ class Param:
         self.fname_data = ''
         self.fname_out = 'bias_field_correction.nii.gz'
         self.fname_mask = ''
-        self.grid = '1'
-        self.iter = '80'
+        #self.grid = '1'
+        self.iter = '[ 50x50x80 ]'
 
 
 # MAIN
@@ -50,18 +43,18 @@ def main():
     if '-mask' in arguments:
         param.fname_mask = arguments['-mask']
         cmd += ' --mask-image ' + param.fname_mask
-    if '-grid' in arguments:
-        param.mesh = int(arguments['-grid'])
-    cmd += ' --meshresolution ' + str(param.mesh)
+    #if '-grid' in arguments:
+    #    param.mesh = int(arguments['-grid'])
+    #cmd += ' --meshresolution ' + str(param.grid)
     if '-nbiter' in arguments:
-        param.iter = int(arguments['-nbiter'])
-    cmd += ' --iterations ' + str(param.iter)
+        param.iter = arguments['-nbiter']
+    cmd += ' --convergence ' + param.iter
 
     os.system(cmd)
 
     # to view results
     sct.printv('\nDone! To view results, type:', 1)
-    sct.printv('fslview '+param.fname_data+' '+param.fname_out + ' &', 1, 'info')
+    sct.printv('fslview '+param.fname_out + ' &', 1, 'info')
 
 # GET PARSER
 #=======================================================================================================================
@@ -88,15 +81,15 @@ def get_parser():
                       mandatory=False,
                       example='bias_field_corrected.nii.gz')
     parser.add_option(name='-nbiter',
-                      type_value='int',
-                      description='Maximum number of iterations',
+                      type_value='str',
+                      description='Maximum number of iterations in each dimension',
                       mandatory=False,
-                      example='50')
-    parser.add_option(name='-grid',
-                      type_value='int',
-                      description='Resolution of the initial B-Spline grid',
-                      mandatory=False,
-                      example='1')
+                      example='[ 50x50x80 ]')
+    #parser.add_option(name='-grid',
+    #                  type_value='int',
+    #                  description='Resolution of the initial B-Spline grid',
+    #                  mandatory=False,
+    #                  example='1')
 
     return parser
 
