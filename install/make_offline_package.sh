@@ -39,7 +39,7 @@ cp install_sct tmp/${package_name}/.
 
 cd tmp
 
-tar -zcvf ${package_name}.tgz package_name
+tar -zcvf ${package_name}.tgz ${package_name}
 
 
 
