@@ -469,6 +469,12 @@ def main():
             # sct.run('sct_apply_transfo -i '+src+' -d '+dest+' -w '+','.join(warp_forward)+' -o '+sct.add_suffix(src, '_reg')+' -x '+interp_step, verbose)
             sct.run('sct_apply_transfo -i '+src+' -d '+dest+' -w '+','.join(warp_forward)+' -o '+add_suffix(src, '_reg')+' -x '+interp_step, verbose)
             src = add_suffix(src, '_reg')
+        # Laplacian filtering
+        if paramreg.steps[str(i_step)].laplacian == '1':
+            sct.run('sct_maths -i '+src+' -laplacian 1 -o src_laplacian.nii')
+            sct.run('sct_maths -i '+dest+' -laplacian 1 -o dest_laplacian.nii')
+            src = 'src_laplacian.nii'
+            dest = 'dest_laplacian.nii'
         # register src --> dest
         warp_forward_out, warp_inverse_out = register(src, dest, paramreg, param, str(i_step))
         warp_forward.append(warp_forward_out)

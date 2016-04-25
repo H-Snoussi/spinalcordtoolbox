@@ -61,7 +61,7 @@ class Param:
 
 # Parameters for registration
 class Paramreg(object):
-    def __init__(self, step='1', type='im', algo='syn', metric='MeanSquares', iter='10', shrink='1', smooth='0', gradStep='0.5', init='', poly='3', slicewise='0'):
+    def __init__(self, step='1', type='im', algo='syn', metric='MeanSquares', iter='10', shrink='1', smooth='0', gradStep='0.5', init='', poly='3', slicewise='0', laplacian='0'):
         self.step = step
         self.type = type
         self.algo = algo
@@ -71,6 +71,7 @@ class Paramreg(object):
         self.smooth = smooth
         self.gradStep = gradStep
         self.slicewise = slicewise
+        self.laplacian = laplacian
         self.init = init
         self.poly = poly  # slicereg only
         # self.window_length = window_length  # str
@@ -334,12 +335,25 @@ def main():
         sct.printv('\nEstimate transformation for step #'+str(i_step)+'...', param.verbose)
         # identify which is the src and dest
         if paramreg.steps[str(i_step)].type == 'im':
-            src = 'src.nii'
-            dest = 'dest.nii'
+            if paramreg.steps[str(i_step)].laplacian == '1':
+                # apply Laplacian filtering
+                sct.run('sct_maths -i src.nii -laplacian 1 -o srcl.nii')
+                sct.run('sct_maths -i dest.nii -laplacian 1 -o destl.nii')
+            else:
+                src = 'src.nii'
+                dest = 'dest.nii'
             interp_step = 'linear'
         elif paramreg.steps[str(i_step)].type == 'seg':
-            src = 'src_seg.nii'
-            dest = 'dest_seg.nii'
+            # if user asked for Laplacian filtering of segmentation
+            if paramreg.steps[str(i_step)].laplacian == '1':
+                # apply Laplacian filtering
+                sct.run('sct_maths -i src_seg.nii -laplacian 1 -o src_segl.nii')
+                sct.run('sct_maths -i dest_seg.nii -laplacian 1 -o dest_segl.nii')
+                src = 'src_segl.nii'
+                dest = 'dest_segl.nii'
+            else:
+                src = 'src_seg.nii'
+                dest = 'dest_seg.nii'
             interp_step = 'nn'
         else:
             src = dest = interp_step = None
